@@ -28,5 +28,6 @@
 }
 
 .Character-err {
-  color: red;
+  color: white;
+  background-color: red;
 }
