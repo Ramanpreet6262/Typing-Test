@@ -31,3 +31,9 @@
   color: white;
   background-color: red;
 }
+
+.totalChars {
+  color: silver;
+  font-weight: normal;
+  font-size: 16px;
+}

@@ -22,6 +22,8 @@ const App = () => {
   });
   const [totalTypedChars, setTotalTypedChars] = useState(0);
   const [correctTypedChars, setCorrectTypedChars] = useState(0);
+  const [startTime, setStartTime] = useState();
+  // const [accuracy, setAccuracy] = useState(0);
   // ----
 
   useKeyPress(key => {
@@ -70,6 +72,7 @@ const App = () => {
       setTotalTypedChars(updatedTotalTypedChars);
       const updatedCorrectTypedChars = correctTypedChars + 1;
       setCorrectTypedChars(updatedCorrectTypedChars);
+      // setAccuracy(((correctTypedChars * 100) / totalTypedChars).toFixed(2));
     }
 
     //  ****
@@ -199,6 +202,15 @@ const App = () => {
           <span className='Character-current'>{currentChar}</span>
           <span>{incomingChars.substr(0, 20)}</span>
         </p>
+        <h3>
+          Errors: {totalTypedChars - correctTypedChars}/
+          <span className='totalChars'>{totalTypedChars}</span> | Accuracy:{' '}
+          {totalTypedChars === 0
+            ? 0
+            : ((correctTypedChars * 100) / totalTypedChars).toFixed(2)}
+          %
+        </h3>
+        <h3>Speed=> CPM: {}</h3>
       </header>
     </div>
   );
