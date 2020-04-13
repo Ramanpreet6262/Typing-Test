@@ -110,6 +110,9 @@ const App = () => {
       if (currentObj.strTyped.length > 0) {
         let newCurrentObj = currentObj;
         let newWordsArray = wordsArray;
+        let newIsWordCorrect = isWordCorrect;
+        let newCurrentIndex = currentIndex;
+
         if (newCurrentObj.hasErr === false) {
           const updatedCorrectTypedChars = correctTypedChars - 1;
           setCorrectTypedChars(updatedCorrectTypedChars);
@@ -139,20 +142,25 @@ const App = () => {
         setIncomingChars(updatedIncomingChars);
         const updatedTotalTypedChars = totalTypedChars - 1;
         setTotalTypedChars(updatedTotalTypedChars);
-        if (incomingChars.charAt(0) === ' ') {
-          let newCurrentIndex = currentIndex - 1;
+        // if (incomingChars.charAt(0) === ' ') {
+        if (currentCharr === ' ') {
+          newCurrentIndex = currentIndex - 1;
           setCurrentIndex(newCurrentIndex);
           if (
             incorrectWords[newCurrentIndex] &&
             incorrectWords[newCurrentIndex].length > 0
           ) {
+            newIsWordCorrect = false;
             setIsWordCorrect(false);
           } else {
+            newIsWordCorrect = true;
             setIsWordCorrect(true);
             setWordCount(wordCount - 1);
           }
-        } else if (!isWordCorrect) {
-          let indexArr = incorrectWords[currentIndex];
+        }
+        // else if (!isWordCorrect) {
+        if (!newIsWordCorrect) {
+          let indexArr = incorrectWords[newCurrentIndex];
           console.log(totalTypedChars - 1);
           if (indexArr.slice(-1) >= totalTypedChars - 1) {
             console.log(`in`);
@@ -160,7 +168,7 @@ const App = () => {
             let newIncorrectWords = {
               ...incorrectWords
             };
-            newIncorrectWords[currentIndex] = indexArr;
+            newIncorrectWords[newCurrentIndex] = indexArr;
             setIncorrectWords(newIncorrectWords);
           }
           if (indexArr.length === 0) {
