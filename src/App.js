@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import generateWords from './utils/generateWords';
 import useKeyPress from './hooks/useKeyPress';
+import currentTime from './utils/time';
 
 const words = generateWords();
 
@@ -24,6 +25,10 @@ const App = () => {
   const [correctTypedChars, setCorrectTypedChars] = useState(0);
   const [startTime, setStartTime] = useState();
   // const [accuracy, setAccuracy] = useState(0);
+  const [incorrectWords, setIncorrectWords] = useState({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [wordCount, setWordCount] = useState(0);
+  const [isWordCorrect, setIsWordCorrect] = useState(true);
   // ----
 
   useKeyPress(key => {
@@ -33,6 +38,10 @@ const App = () => {
     // -----
     let newCurrentObj = currentObj;
     let newWordsArray = wordsArray;
+
+    if (!startTime) {
+      setStartTime(currentTime());
+    }
     // -----
 
     if (key === currentChar) {
@@ -73,6 +82,13 @@ const App = () => {
       const updatedCorrectTypedChars = correctTypedChars + 1;
       setCorrectTypedChars(updatedCorrectTypedChars);
       // setAccuracy(((correctTypedChars * 100) / totalTypedChars).toFixed(2));
+      if (incomingChars.charAt(0) === ' ') {
+        if (isWordCorrect) {
+          setWordCount(wordCount + 1);
+        }
+        setCurrentIndex(currentIndex + 1);
+        setIsWordCorrect(true);
+      }
     }
 
     //  ****
@@ -123,6 +139,34 @@ const App = () => {
         setIncomingChars(updatedIncomingChars);
         const updatedTotalTypedChars = totalTypedChars - 1;
         setTotalTypedChars(updatedTotalTypedChars);
+        if (incomingChars.charAt(0) === ' ') {
+          let newCurrentIndex = currentIndex - 1;
+          setCurrentIndex(newCurrentIndex);
+          if (
+            incorrectWords[newCurrentIndex] &&
+            incorrectWords[newCurrentIndex].length > 0
+          ) {
+            setIsWordCorrect(false);
+          } else {
+            setIsWordCorrect(true);
+            setWordCount(wordCount - 1);
+          }
+        } else if (!isWordCorrect) {
+          let indexArr = incorrectWords[currentIndex];
+          console.log(totalTypedChars - 1);
+          if (indexArr.slice(-1) >= totalTypedChars - 1) {
+            console.log(`in`);
+            indexArr.pop();
+            let newIncorrectWords = {
+              ...incorrectWords
+            };
+            newIncorrectWords[currentIndex] = indexArr;
+            setIncorrectWords(newIncorrectWords);
+          }
+          if (indexArr.length === 0) {
+            setIsWordCorrect(true);
+          }
+        }
       }
       // }
     }
@@ -163,17 +207,58 @@ const App = () => {
       setIncomingChars(updatedIncomingChars);
       const updatedTotalTypedChars = totalTypedChars + 1;
       setTotalTypedChars(updatedTotalTypedChars);
+      setIsWordCorrect(false);
+      if (incorrectWords.hasOwnProperty(currentIndex)) {
+        let arr = incorrectWords[currentIndex];
+        // arr.push(totalTypedChars - 1);
+        arr.push(totalTypedChars);
+        let newIncorrectWords = {
+          ...incorrectWords
+        };
+        newIncorrectWords[currentIndex] = arr;
+        setIncorrectWords(newIncorrectWords);
+      } else {
+        // let newArr = [totalTypedChars - 1];
+        let newArr = [totalTypedChars];
+        let newIncorrectWords = {
+          ...incorrectWords
+        };
+        newIncorrectWords[currentIndex] = newArr;
+        setIncorrectWords(newIncorrectWords);
+      }
+      // if last char of word is wrong, then also do this...
+      if (incomingChars.charAt(0) === ' ') {
+        setCurrentIndex(currentIndex + 1);
+        setIsWordCorrect(true);
+      }
+      // let newIncorrectWords = {
+      //   ...incorrectWords,
+      //   currentIndex:
+      // };
     }
     // -----
   });
 
-  let typed = [...wordsArray, currentObj].map(object => {
+  const getTimeDur = () => {
+    return (currentTime() - startTime) / 60000.0;
+  };
+
+  let typed = [...wordsArray, currentObj].map((object, index) => {
     if (object.hasErr === false) {
-      return <span className='Character-out'>{object.strTyped}</span>;
+      return (
+        <span className='Character-out' key={index}>
+          {object.strTyped}
+        </span>
+      );
     } else {
-      return <span className='Character-err'>{object.strTyped}</span>;
+      return (
+        <span className='Character-err' key={index}>
+          {object.strTyped}
+        </span>
+      );
     }
   });
+
   return (
     <div className='App'>
       <header className='App-header'>
@@ -210,7 +295,11 @@ const App = () => {
             : ((correctTypedChars * 100) / totalTypedChars).toFixed(2)}
           %
         </h3>
-        <h3>Speed=> CPM: {}</h3>
+        <h3>
+          Speed=> CPM:{' '}
+          {startTime ? (correctTypedChars / getTimeDur()).toFixed(0) : 0} | WPM:{' '}
+          {startTime ? (wordCount / getTimeDur()).toFixed(0) : 0}
+        </h3>
       </header>
     </div>
   );
