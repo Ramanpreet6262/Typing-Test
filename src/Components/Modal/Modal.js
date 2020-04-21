@@ -5,16 +5,15 @@ import Modal from '@material-ui/core/Modal';
 const useStyles = makeStyles(theme => ({
   paper: {
     position: 'absolute',
-    width: 800,
-    height: '80%',
+    width: 600,
+    height: '40%',
     backgroundColor: theme.palette.background.paper,
-    border: '4px solid #82bb37',
+    border: '4px solid #61dafb',
     boxShadow: theme.shadows[5],
     padding: theme.spacing(2, 4, 3),
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    overflowY: 'scroll',
     outline: '0'
   }
 }));

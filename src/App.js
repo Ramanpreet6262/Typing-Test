@@ -35,7 +35,7 @@ const App = () => {
   const [timer, setTimer] = useState(10);
   // const [timeInterval, setTimeInterval] = useState(null);
   const [isTimeFinished, setIsTimeFinished] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(true);
   // ----
 
   useKeyPress(key => {
@@ -274,13 +274,18 @@ const App = () => {
         setIsTimeFinished(false);
       } else {
         clearInterval(timeInterval);
-        stopTimer();
+        showResult();
       }
     }, 1000);
   };
 
-  const stopTimer = () => {
+  const showResult = () => {
     setIsTimeFinished(true);
+    setShowResultModal(true);
+  };
+
+  const handleModalClose = () => {
+    setShowResultModal(false);
   };
 
   const getTimeDur = () => {
@@ -346,6 +351,9 @@ const App = () => {
           {startTime ? (wordCount / getTimeDur()).toFixed(0) : 0}
         </h3>
       </header>
+      <ResultModal open={showResultModal} handleClose={handleModalClose}>
+        <p>Result</p>
+      </ResultModal>
     </div>
   );
 };
