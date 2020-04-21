@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import generateWords from './utils/generateWords';
 import useKeyPress from './hooks/useKeyPress';
 import currentTime from './utils/time';
+import ResultModal from './Components/Modal/Modal';
 
 const words = generateWords();
 
@@ -11,6 +12,7 @@ const App = () => {
   //   new Array(20).fill(' ').join('')
   // );
   // const [outgoingChars, setOutgoingChars] = useState('');
+  let timeInterval = null;
   const [currentChar, setCurrentChar] = useState(words.charAt(0));
   const [incomingChars, setIncomingChars] = useState(words.substr(1));
 
@@ -29,6 +31,11 @@ const App = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [wordCount, setWordCount] = useState(0);
   const [isWordCorrect, setIsWordCorrect] = useState(true);
+  // const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(10);
+  // const [timeInterval, setTimeInterval] = useState(null);
+  const [isTimeFinished, setIsTimeFinished] = useState(false);
+  const [showResult, setShowResult] = useState(false);
   // ----
 
   useKeyPress(key => {
@@ -41,211 +48,240 @@ const App = () => {
 
     if (!startTime) {
       setStartTime(currentTime());
+      startTimer();
     }
     // -----
 
-    if (key === currentChar) {
-      // -----
-      // setHasErr(false);
-      // -----
+    if (!isTimeFinished) {
+      if (key === currentChar) {
+        // -----
+        // setHasErr(false);
+        // -----
 
-      // if (leftPadding.length > 0) {
-      //   setLeftPadding(leftPadding.substring(1));
-      // }
+        // if (leftPadding.length > 0) {
+        //   setLeftPadding(leftPadding.substring(1));
+        // }
 
-      // ----
-      if (currentObj.hasErr === false) {
-        newCurrentObj.strTyped += currentChar;
-        setCurrentObj(newCurrentObj);
-      } else if (currentObj.hasErr === true) {
-        newWordsArray.push(newCurrentObj);
-        setWordsArray(newWordsArray);
-        newCurrentObj = {
-          strTyped: currentChar,
-          hasErr: false
-        };
-        setCurrentObj(newCurrentObj);
-      }
-      // ----
-      // updatedOutgoingChars += currentChar;
-      // setOutgoingChars(updatedOutgoingChars);
-
-      setCurrentChar(incomingChars.charAt(0));
-
-      updatedIncomingChars = incomingChars.substring(1);
-      if (updatedIncomingChars.split(' ').length < 10) {
-        updatedIncomingChars += ' ' + generateWords();
-      }
-      setIncomingChars(updatedIncomingChars);
-      const updatedTotalTypedChars = totalTypedChars + 1;
-      setTotalTypedChars(updatedTotalTypedChars);
-      const updatedCorrectTypedChars = correctTypedChars + 1;
-      setCorrectTypedChars(updatedCorrectTypedChars);
-      // setAccuracy(((correctTypedChars * 100) / totalTypedChars).toFixed(2));
-      if (incomingChars.charAt(0) === ' ') {
-        if (isWordCorrect) {
-          setWordCount(wordCount + 1);
+        // ----
+        if (currentObj.hasErr === false) {
+          newCurrentObj.strTyped += currentChar;
+          setCurrentObj(newCurrentObj);
+        } else if (currentObj.hasErr === true) {
+          newWordsArray.push(newCurrentObj);
+          setWordsArray(newWordsArray);
+          newCurrentObj = {
+            strTyped: currentChar,
+            hasErr: false
+          };
+          setCurrentObj(newCurrentObj);
         }
-        setCurrentIndex(currentIndex + 1);
-        setIsWordCorrect(true);
+        // ----
+        // updatedOutgoingChars += currentChar;
+        // setOutgoingChars(updatedOutgoingChars);
+
+        setCurrentChar(incomingChars.charAt(0));
+
+        updatedIncomingChars = incomingChars.substring(1);
+        if (updatedIncomingChars.split(' ').length < 10) {
+          updatedIncomingChars += ' ' + generateWords();
+        }
+        setIncomingChars(updatedIncomingChars);
+        const updatedTotalTypedChars = totalTypedChars + 1;
+        setTotalTypedChars(updatedTotalTypedChars);
+        const updatedCorrectTypedChars = correctTypedChars + 1;
+        setCorrectTypedChars(updatedCorrectTypedChars);
+        // setAccuracy(((correctTypedChars * 100) / totalTypedChars).toFixed(2));
+        if (incomingChars.charAt(0) === ' ') {
+          if (isWordCorrect) {
+            setWordCount(wordCount + 1);
+          }
+          setCurrentIndex(currentIndex + 1);
+          setIsWordCorrect(true);
+        }
       }
-    }
 
-    //  ****
-    else if (key === 'Backspace') {
-      // if (updatedOutgoingChars.length !== 0) {
-      // setHasErr(false);
-      // let updatedLeftPadding = leftPadding;
+      //  ****
+      else if (key === 'Backspace') {
+        // if (updatedOutgoingChars.length !== 0) {
+        // setHasErr(false);
+        // let updatedLeftPadding = leftPadding;
 
-      // if (leftPadding.length > 0) {
-      //   updatedLeftPadding += ' ';
-      //   setLeftPadding(updatedLeftPadding);
-      // }
-      // const lastChar = updatedOutgoingChars.slice(-1);
-      // setOutgoingChars(updatedOutgoingChars.slice(0, -1));
-      // setOutgoingChars(
-      //   updatedOutgoingChars.substr(0, updatedOutgoingChars.length - 1)
-      // );
+        // if (leftPadding.length > 0) {
+        //   updatedLeftPadding += ' ';
+        //   setLeftPadding(updatedLeftPadding);
+        // }
+        // const lastChar = updatedOutgoingChars.slice(-1);
+        // setOutgoingChars(updatedOutgoingChars.slice(0, -1));
+        // setOutgoingChars(
+        //   updatedOutgoingChars.substr(0, updatedOutgoingChars.length - 1)
+        // );
 
-      if (currentObj.strTyped.length > 0) {
+        if (currentObj.strTyped.length > 0) {
+          let newCurrentObj = currentObj;
+          let newWordsArray = wordsArray;
+          let newIsWordCorrect = isWordCorrect;
+          let newCurrentIndex = currentIndex;
+
+          if (newCurrentObj.hasErr === false) {
+            const updatedCorrectTypedChars = correctTypedChars - 1;
+            setCorrectTypedChars(updatedCorrectTypedChars);
+          }
+          let lastChar = newCurrentObj.strTyped.slice(-1);
+
+          let newStr = newCurrentObj.strTyped.substr(
+            0,
+            currentObj.strTyped.length - 1
+          );
+
+          if (newStr.length === 0 && newWordsArray.length !== 0) {
+            let newObj = newWordsArray.pop();
+            setCurrentObj(newObj);
+            setWordsArray(newWordsArray);
+          } else {
+            setCurrentObj({
+              ...currentObj,
+              strTyped: newStr
+            });
+          }
+
+          const currentCharr = currentChar;
+          setCurrentChar(lastChar);
+
+          updatedIncomingChars = currentCharr + incomingChars;
+          setIncomingChars(updatedIncomingChars);
+          const updatedTotalTypedChars = totalTypedChars - 1;
+          setTotalTypedChars(updatedTotalTypedChars);
+          // if (incomingChars.charAt(0) === ' ') {
+          if (currentCharr === ' ') {
+            newCurrentIndex = currentIndex - 1;
+            setCurrentIndex(newCurrentIndex);
+            if (
+              incorrectWords[newCurrentIndex] &&
+              incorrectWords[newCurrentIndex].length > 0
+            ) {
+              newIsWordCorrect = false;
+              setIsWordCorrect(false);
+            } else {
+              newIsWordCorrect = true;
+              setIsWordCorrect(true);
+              setWordCount(wordCount - 1);
+            }
+          }
+          // else if (!isWordCorrect) {
+          if (!newIsWordCorrect) {
+            let indexArr = incorrectWords[newCurrentIndex];
+            // console.log(totalTypedChars - 1);
+            if (indexArr.slice(-1) >= totalTypedChars - 1) {
+              // console.log(`in`);
+              indexArr.pop();
+              let newIncorrectWords = {
+                ...incorrectWords
+              };
+              newIncorrectWords[newCurrentIndex] = indexArr;
+              setIncorrectWords(newIncorrectWords);
+            }
+            if (indexArr.length === 0) {
+              setIsWordCorrect(true);
+            }
+          }
+        }
+        // }
+      }
+      //  ****
+
+      // ------
+      // if (key !== currentChar) {
+      else {
+        // setHasErr(true);
+        // if (leftPadding.length > 0) {
+        //   setLeftPadding(leftPadding.substring(1));
+        // }
+
+        // updatedOutgoingChars += currentChar;
+        // setOutgoingChars(updatedOutgoingChars);
         let newCurrentObj = currentObj;
         let newWordsArray = wordsArray;
-        let newIsWordCorrect = isWordCorrect;
-        let newCurrentIndex = currentIndex;
 
-        if (newCurrentObj.hasErr === false) {
-          const updatedCorrectTypedChars = correctTypedChars - 1;
-          setCorrectTypedChars(updatedCorrectTypedChars);
-        }
-        let lastChar = newCurrentObj.strTyped.slice(-1);
-
-        let newStr = newCurrentObj.strTyped.substr(
-          0,
-          currentObj.strTyped.length - 1
-        );
-
-        if (newStr.length === 0 && newWordsArray.length !== 0) {
-          let newObj = newWordsArray.pop();
-          setCurrentObj(newObj);
+        if (currentObj.hasErr === true) {
+          newCurrentObj.strTyped += currentChar;
+          setCurrentObj(newCurrentObj);
+        } else if (currentObj.hasErr === false) {
+          newWordsArray.push(newCurrentObj);
           setWordsArray(newWordsArray);
-        } else {
-          setCurrentObj({
-            ...currentObj,
-            strTyped: newStr
-          });
+          newCurrentObj = {
+            strTyped: currentChar,
+            hasErr: true
+          };
+          setCurrentObj(newCurrentObj);
         }
 
-        const currentCharr = currentChar;
-        setCurrentChar(lastChar);
+        setCurrentChar(incomingChars.charAt(0));
 
-        updatedIncomingChars = currentCharr + incomingChars;
+        updatedIncomingChars = incomingChars.substring(1);
+        if (updatedIncomingChars.split(' ').length < 10) {
+          updatedIncomingChars += ' ' + generateWords();
+        }
         setIncomingChars(updatedIncomingChars);
-        const updatedTotalTypedChars = totalTypedChars - 1;
+        const updatedTotalTypedChars = totalTypedChars + 1;
         setTotalTypedChars(updatedTotalTypedChars);
-        // if (incomingChars.charAt(0) === ' ') {
-        if (currentCharr === ' ') {
-          newCurrentIndex = currentIndex - 1;
-          setCurrentIndex(newCurrentIndex);
-          if (
-            incorrectWords[newCurrentIndex] &&
-            incorrectWords[newCurrentIndex].length > 0
-          ) {
-            newIsWordCorrect = false;
-            setIsWordCorrect(false);
-          } else {
-            newIsWordCorrect = true;
-            setIsWordCorrect(true);
-            setWordCount(wordCount - 1);
-          }
+        setIsWordCorrect(false);
+        if (incorrectWords.hasOwnProperty(currentIndex)) {
+          let arr = incorrectWords[currentIndex];
+          // arr.push(totalTypedChars - 1);
+          arr.push(totalTypedChars);
+          let newIncorrectWords = {
+            ...incorrectWords
+          };
+          newIncorrectWords[currentIndex] = arr;
+          setIncorrectWords(newIncorrectWords);
+        } else {
+          // let newArr = [totalTypedChars - 1];
+          let newArr = [totalTypedChars];
+          let newIncorrectWords = {
+            ...incorrectWords
+          };
+          newIncorrectWords[currentIndex] = newArr;
+          setIncorrectWords(newIncorrectWords);
         }
-        // else if (!isWordCorrect) {
-        if (!newIsWordCorrect) {
-          let indexArr = incorrectWords[newCurrentIndex];
-          console.log(totalTypedChars - 1);
-          if (indexArr.slice(-1) >= totalTypedChars - 1) {
-            console.log(`in`);
-            indexArr.pop();
-            let newIncorrectWords = {
-              ...incorrectWords
-            };
-            newIncorrectWords[newCurrentIndex] = indexArr;
-            setIncorrectWords(newIncorrectWords);
-          }
-          if (indexArr.length === 0) {
-            setIsWordCorrect(true);
-          }
+        // if last char of word is wrong, then also do this...
+        if (incomingChars.charAt(0) === ' ') {
+          setCurrentIndex(currentIndex + 1);
+          setIsWordCorrect(true);
         }
+        // let newIncorrectWords = {
+        //   ...incorrectWords,
+        //   currentIndex:
+        // };
       }
-      // }
-    }
-    //  ****
-
-    // ------
-    // if (key !== currentChar) {
-    else {
-      // setHasErr(true);
-      // if (leftPadding.length > 0) {
-      //   setLeftPadding(leftPadding.substring(1));
-      // }
-
-      // updatedOutgoingChars += currentChar;
-      // setOutgoingChars(updatedOutgoingChars);
-      let newCurrentObj = currentObj;
-      let newWordsArray = wordsArray;
-
-      if (currentObj.hasErr === true) {
-        newCurrentObj.strTyped += currentChar;
-        setCurrentObj(newCurrentObj);
-      } else if (currentObj.hasErr === false) {
-        newWordsArray.push(newCurrentObj);
-        setWordsArray(newWordsArray);
-        newCurrentObj = {
-          strTyped: currentChar,
-          hasErr: true
-        };
-        setCurrentObj(newCurrentObj);
-      }
-
-      setCurrentChar(incomingChars.charAt(0));
-
-      updatedIncomingChars = incomingChars.substring(1);
-      if (updatedIncomingChars.split(' ').length < 10) {
-        updatedIncomingChars += ' ' + generateWords();
-      }
-      setIncomingChars(updatedIncomingChars);
-      const updatedTotalTypedChars = totalTypedChars + 1;
-      setTotalTypedChars(updatedTotalTypedChars);
-      setIsWordCorrect(false);
-      if (incorrectWords.hasOwnProperty(currentIndex)) {
-        let arr = incorrectWords[currentIndex];
-        // arr.push(totalTypedChars - 1);
-        arr.push(totalTypedChars);
-        let newIncorrectWords = {
-          ...incorrectWords
-        };
-        newIncorrectWords[currentIndex] = arr;
-        setIncorrectWords(newIncorrectWords);
-      } else {
-        // let newArr = [totalTypedChars - 1];
-        let newArr = [totalTypedChars];
-        let newIncorrectWords = {
-          ...incorrectWords
-        };
-        newIncorrectWords[currentIndex] = newArr;
-        setIncorrectWords(newIncorrectWords);
-      }
-      // if last char of word is wrong, then also do this...
-      if (incomingChars.charAt(0) === ' ') {
-        setCurrentIndex(currentIndex + 1);
-        setIsWordCorrect(true);
-      }
-      // let newIncorrectWords = {
-      //   ...incorrectWords,
-      //   currentIndex:
-      // };
     }
     // -----
   });
+
+  useEffect(() => {
+    return () => {
+      if (timeInterval !== null) {
+        clearInterval(timeInterval);
+      }
+    };
+  });
+
+  const startTimer = () => {
+    let newTimer = timer;
+    timeInterval = setInterval(() => {
+      if (newTimer > 0) {
+        newTimer -= 1;
+        setTimer(newTimer);
+        setIsTimeFinished(false);
+      } else {
+        clearInterval(timeInterval);
+        stopTimer();
+      }
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    setIsTimeFinished(true);
+  };
 
   const getTimeDur = () => {
     return (currentTime() - startTime) / 60000.0;
@@ -295,6 +331,7 @@ const App = () => {
           <span className='Character-current'>{currentChar}</span>
           <span>{incomingChars.substr(0, 20)}</span>
         </p>
+        <h3>Timer: {timer}</h3>
         <h3>
           Errors: {totalTypedChars - correctTypedChars}/
           <span className='totalChars'>{totalTypedChars}</span> | Accuracy:{' '}
