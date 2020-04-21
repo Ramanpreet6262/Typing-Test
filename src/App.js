@@ -248,10 +248,6 @@ const App = () => {
           setCurrentIndex(currentIndex + 1);
           setIsWordCorrect(true);
         }
-        // let newIncorrectWords = {
-        //   ...incorrectWords,
-        //   currentIndex:
-        // };
       }
     }
     // -----
@@ -352,7 +348,30 @@ const App = () => {
         </h3>
       </header>
       <ResultModal open={showResultModal} handleClose={handleModalClose}>
-        <p>Result</p>
+        <h1 className='result-heading'>
+          Your typing speed is{' '}
+          <span className='result-wpm'>
+            {startTime ? (wordCount / getTimeDur()).toFixed(0) : 0}WPM
+          </span>
+        </h1>
+        <div className='result-typingspeed'>
+          <p className='typing-speed-heading'>Typing Speed</p>
+          <p className='typing-speed-content'>
+            {startTime ? (correctTypedChars / getTimeDur()).toFixed(0) : 0}
+            <span className='unfocused-content'>CPM</span> |{' '}
+            {startTime ? (wordCount / getTimeDur()).toFixed(0) : 0}
+            <span className='unfocused-content'>WPM</span>
+          </p>
+        </div>
+        <div className='result-accuracy'>
+          <p className='accuracy-heading'>Accuracy</p>
+          <p className='accuracy-content'>
+            {totalTypedChars === 0
+              ? 0
+              : ((correctTypedChars * 100) / totalTypedChars).toFixed(2)}
+            <span className='unfocused-content'>%</span>
+          </p>
+        </div>
       </ResultModal>
     </div>
   );
