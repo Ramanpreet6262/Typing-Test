@@ -282,10 +282,36 @@ const App = () => {
 
   const handleModalClose = () => {
     setShowResultModal(false);
+    resetSettings();
+  };
+
+  const resetSettings = () => {
+    const newWords = generateWords();
+    timeInterval = null;
+    setCurrentChar(newWords.charAt(0));
+    setIncomingChars(newWords.substr(1));
+    setWordsArray([]);
+    setCurrentObj({
+      strTyped: '',
+      hasErr: false
+    });
+    setTotalTypedChars(0);
+    setCorrectTypedChars(0);
+    setStartTime(null);
+    setIncorrectWords({});
+    setCurrentIndex(0);
+    setWordCount(0);
+    setIsWordCorrect(true);
+    setTimer(10);
+    setIsTimeFinished(false);
   };
 
   const getTimeDur = () => {
-    return (currentTime() - startTime) / 60000.0;
+    if (!isTimeFinished) {
+      return (currentTime() - startTime) / 60000.0;
+    } else {
+      return 10.0;
+    }
   };
 
   let typed = [...wordsArray, currentObj].map((object, index) => {
