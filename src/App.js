@@ -4,6 +4,10 @@ import generateWords from './utils/generateWords';
 import useKeyPress from './hooks/useKeyPress';
 import currentTime from './utils/time';
 import ResultModal from './Components/Modal/Modal';
+import UIfx from 'uifx';
+import keyPressAudio from './keypress.mp3';
+
+const keyAudio = new UIfx(keyPressAudio);
 
 const words = generateWords();
 
@@ -26,20 +30,17 @@ const App = () => {
   const [totalTypedChars, setTotalTypedChars] = useState(0);
   const [correctTypedChars, setCorrectTypedChars] = useState(0);
   const [startTime, setStartTime] = useState();
-  // const [accuracy, setAccuracy] = useState(0);
   const [incorrectWords, setIncorrectWords] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [wordCount, setWordCount] = useState(0);
   const [isWordCorrect, setIsWordCorrect] = useState(true);
   // const [timer, setTimer] = useState(60);
   const [timer, setTimer] = useState(10);
-  // const [timeInterval, setTimeInterval] = useState(null);
   const [isTimeFinished, setIsTimeFinished] = useState(false);
   const [showResultModal, setShowResultModal] = useState(true);
   // ----
 
   useKeyPress(key => {
-    // let updatedOutgoingChars = outgoingChars;
     let updatedIncomingChars = incomingChars;
 
     // -----
@@ -55,13 +56,13 @@ const App = () => {
     if (!isTimeFinished) {
       if (key === currentChar) {
         // -----
-        // setHasErr(false);
         // -----
 
         // if (leftPadding.length > 0) {
         //   setLeftPadding(leftPadding.substring(1));
         // }
 
+        keyAudio.setVolume(0.4).play();
         // ----
         if (currentObj.hasErr === false) {
           newCurrentObj.strTyped += currentChar;
@@ -90,7 +91,6 @@ const App = () => {
         setTotalTypedChars(updatedTotalTypedChars);
         const updatedCorrectTypedChars = correctTypedChars + 1;
         setCorrectTypedChars(updatedCorrectTypedChars);
-        // setAccuracy(((correctTypedChars * 100) / totalTypedChars).toFixed(2));
         if (incomingChars.charAt(0) === ' ') {
           if (isWordCorrect) {
             setWordCount(wordCount + 1);
@@ -117,6 +117,8 @@ const App = () => {
         // );
 
         if (currentObj.strTyped.length > 0) {
+          keyAudio.setVolume(0.4).play();
+
           let newCurrentObj = currentObj;
           let newWordsArray = wordsArray;
           let newIsWordCorrect = isWordCorrect;
@@ -151,7 +153,6 @@ const App = () => {
           setIncomingChars(updatedIncomingChars);
           const updatedTotalTypedChars = totalTypedChars - 1;
           setTotalTypedChars(updatedTotalTypedChars);
-          // if (incomingChars.charAt(0) === ' ') {
           if (currentCharr === ' ') {
             newCurrentIndex = currentIndex - 1;
             setCurrentIndex(newCurrentIndex);
@@ -167,12 +168,9 @@ const App = () => {
               setWordCount(wordCount - 1);
             }
           }
-          // else if (!isWordCorrect) {
           if (!newIsWordCorrect) {
             let indexArr = incorrectWords[newCurrentIndex];
-            // console.log(totalTypedChars - 1);
             if (indexArr.slice(-1) >= totalTypedChars - 1) {
-              // console.log(`in`);
               indexArr.pop();
               let newIncorrectWords = {
                 ...incorrectWords
@@ -185,14 +183,7 @@ const App = () => {
             }
           }
         }
-        // }
-      }
-      //  ****
-
-      // ------
-      // if (key !== currentChar) {
-      else {
-        // setHasErr(true);
+      } else {
         // if (leftPadding.length > 0) {
         //   setLeftPadding(leftPadding.substring(1));
         // }
@@ -227,7 +218,6 @@ const App = () => {
         setIsWordCorrect(false);
         if (incorrectWords.hasOwnProperty(currentIndex)) {
           let arr = incorrectWords[currentIndex];
-          // arr.push(totalTypedChars - 1);
           arr.push(totalTypedChars);
           let newIncorrectWords = {
             ...incorrectWords
@@ -235,7 +225,6 @@ const App = () => {
           newIncorrectWords[currentIndex] = arr;
           setIncorrectWords(newIncorrectWords);
         } else {
-          // let newArr = [totalTypedChars - 1];
           let newArr = [totalTypedChars];
           let newIncorrectWords = {
             ...incorrectWords
@@ -243,14 +232,12 @@ const App = () => {
           newIncorrectWords[currentIndex] = newArr;
           setIncorrectWords(newIncorrectWords);
         }
-        // if last char of word is wrong, then also do this...
         if (incomingChars.charAt(0) === ' ') {
           setCurrentIndex(currentIndex + 1);
           setIsWordCorrect(true);
         }
       }
     }
-    // -----
   });
 
   useEffect(() => {
@@ -310,7 +297,7 @@ const App = () => {
     if (!isTimeFinished) {
       return (currentTime() - startTime) / 60000.0;
     } else {
-      return 10.0;
+      return 10 / 60.0;
     }
   };
 
@@ -358,7 +345,14 @@ const App = () => {
           <span className='Character-current'>{currentChar}</span>
           <span>{incomingChars.substr(0, 20)}</span>
         </p>
-        <h3>Timer: {timer}</h3>
+        <h3>
+          Timer:{' '}
+          {timer <= 5 ? (
+            <span className='red-timer'>{timer}sec</span>
+          ) : (
+            timer + 'sec'
+          )}
+        </h3>
         <h3>
           Errors: {totalTypedChars - correctTypedChars}/
           <span className='totalChars'>{totalTypedChars}</span> | Accuracy:{' '}
