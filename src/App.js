@@ -12,16 +12,9 @@ const keyAudio = new UIfx(keyPressAudio);
 const words = generateWords();
 
 const App = () => {
-  // const [leftPadding, setLeftPadding] = useState(
-  //   new Array(20).fill(' ').join('')
-  // );
-  // const [outgoingChars, setOutgoingChars] = useState('');
   let timeInterval = null;
   const [currentChar, setCurrentChar] = useState(words.charAt(0));
   const [incomingChars, setIncomingChars] = useState(words.substr(1));
-
-  // ----
-  // const [hasErr, setHasErr] = useState(false);
   const [wordsArray, setWordsArray] = useState([]);
   const [currentObj, setCurrentObj] = useState({
     strTyped: '',
@@ -34,16 +27,12 @@ const App = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [wordCount, setWordCount] = useState(0);
   const [isWordCorrect, setIsWordCorrect] = useState(true);
-  // const [timer, setTimer] = useState(60);
-  const [timer, setTimer] = useState(10);
+  const [timer, setTimer] = useState(60);
   const [isTimeFinished, setIsTimeFinished] = useState(false);
-  const [showResultModal, setShowResultModal] = useState(true);
-  // ----
+  const [showResultModal, setShowResultModal] = useState(false);
 
   useKeyPress(key => {
     let updatedIncomingChars = incomingChars;
-
-    // -----
     let newCurrentObj = currentObj;
     let newWordsArray = wordsArray;
 
@@ -51,19 +40,11 @@ const App = () => {
       setStartTime(currentTime());
       startTimer();
     }
-    // -----
 
     if (!isTimeFinished) {
       if (key === currentChar) {
-        // -----
-        // -----
-
-        // if (leftPadding.length > 0) {
-        //   setLeftPadding(leftPadding.substring(1));
-        // }
-
         keyAudio.setVolume(0.4).play();
-        // ----
+
         if (currentObj.hasErr === false) {
           newCurrentObj.strTyped += currentChar;
           setCurrentObj(newCurrentObj);
@@ -76,9 +57,6 @@ const App = () => {
           };
           setCurrentObj(newCurrentObj);
         }
-        // ----
-        // updatedOutgoingChars += currentChar;
-        // setOutgoingChars(updatedOutgoingChars);
 
         setCurrentChar(incomingChars.charAt(0));
 
@@ -98,24 +76,7 @@ const App = () => {
           setCurrentIndex(currentIndex + 1);
           setIsWordCorrect(true);
         }
-      }
-
-      //  ****
-      else if (key === 'Backspace') {
-        // if (updatedOutgoingChars.length !== 0) {
-        // setHasErr(false);
-        // let updatedLeftPadding = leftPadding;
-
-        // if (leftPadding.length > 0) {
-        //   updatedLeftPadding += ' ';
-        //   setLeftPadding(updatedLeftPadding);
-        // }
-        // const lastChar = updatedOutgoingChars.slice(-1);
-        // setOutgoingChars(updatedOutgoingChars.slice(0, -1));
-        // setOutgoingChars(
-        //   updatedOutgoingChars.substr(0, updatedOutgoingChars.length - 1)
-        // );
-
+      } else if (key === 'Backspace') {
         if (currentObj.strTyped.length > 0) {
           keyAudio.setVolume(0.4).play();
 
@@ -184,12 +145,6 @@ const App = () => {
           }
         }
       } else {
-        // if (leftPadding.length > 0) {
-        //   setLeftPadding(leftPadding.substring(1));
-        // }
-
-        // updatedOutgoingChars += currentChar;
-        // setOutgoingChars(updatedOutgoingChars);
         let newCurrentObj = currentObj;
         let newWordsArray = wordsArray;
 
@@ -289,7 +244,7 @@ const App = () => {
     setCurrentIndex(0);
     setWordCount(0);
     setIsWordCorrect(true);
-    setTimer(10);
+    setTimer(60);
     setIsTimeFinished(false);
   };
 
@@ -297,75 +252,83 @@ const App = () => {
     if (!isTimeFinished) {
       return (currentTime() - startTime) / 60000.0;
     } else {
-      return 10 / 60.0;
+      return 60 / 60.0;
     }
   };
 
-  let typed = [...wordsArray, currentObj].map((object, index) => {
-    if (object.hasErr === false) {
-      return (
-        <span className='Character-out' key={index}>
-          {object.strTyped}
+  let counter = 20;
+  let finalArr = [];
+  let typeArr = [...wordsArray, currentObj];
+  for (let i = typeArr.length - 1; i >= 0; i--) {
+    if (typeArr[i].strTyped.length > counter) {
+      let typedStr = typeArr[i].strTyped.substr(-counter, counter);
+      let spanTag = (
+        <span
+          className={typeArr[i].hasErr ? 'Character-err' : 'Character-out'}
+          key={i}
+        >
+          {typedStr}
         </span>
       );
+      finalArr.push(spanTag);
+      counter = 0;
+      break;
     } else {
-      return (
-        <span className='Character-err' key={index}>
-          {object.strTyped}
+      let typedStr = typeArr[i].strTyped;
+      let spanTag = (
+        <span
+          className={typeArr[i].hasErr ? 'Character-err' : 'Character-out'}
+          key={i}
+        >
+          {typedStr}
         </span>
       );
+      finalArr.push(spanTag);
+      counter = counter - typedStr.length;
     }
-  });
+  }
+
+  if (counter > 0) {
+    let emptyStr = new Array(counter).fill(' ').join('');
+    let spanTag = (
+      <span className='Character-out' key={-1}>
+        {emptyStr}
+      </span>
+    );
+    finalArr.push(spanTag);
+  }
 
   return (
     <div className='App'>
       <header className='App-header'>
-        <p className='Character'>
-          {/* <span className={hasErr ? 'Character-err' : 'Character-out'}>
-            {(leftPadding + outgoingChars).slice(-20)}
-          </span> */}
-          {/* {hasErr ? (
-            <>
-              <span className='Character-out'>
-                {(leftPadding + outgoingChars).substr(
-                  0,
-                  (leftPadding + outgoingChars).length - 1
-                )}
-              </span>
-              <span className='Character-err'>
-                {(leftPadding + outgoingChars).slice(-1)}
-              </span>
-            </>
-          ) : (
-            <span className='Character-out'>
-              {(leftPadding + outgoingChars).slice(-20)}
-            </span>
-          )} */}
-          {typed}
-          <span className='Character-current'>{currentChar}</span>
-          <span>{incomingChars.substr(0, 20)}</span>
-        </p>
-        <h3>
+        <h3 className='timer-block'>
           Timer:{' '}
-          {timer <= 5 ? (
+          {timer < 10 ? (
             <span className='red-timer'>{timer}sec</span>
           ) : (
             timer + 'sec'
           )}
         </h3>
-        <h3>
-          Errors: {totalTypedChars - correctTypedChars}/
-          <span className='totalChars'>{totalTypedChars}</span> | Accuracy:{' '}
-          {totalTypedChars === 0
-            ? 0
-            : ((correctTypedChars * 100) / totalTypedChars).toFixed(2)}
-          %
-        </h3>
-        <h3>
-          Speed=> CPM:{' '}
-          {startTime ? (correctTypedChars / getTimeDur()).toFixed(0) : 0} | WPM:{' '}
-          {startTime ? (wordCount / getTimeDur()).toFixed(0) : 0}
-        </h3>
+        <p className='Character'>
+          {finalArr.reverse()}
+          <span className='Character-current'>{currentChar}</span>
+          <span>{incomingChars.substr(0, 20)}</span>
+        </p>
+        <div className='parameters-div'>
+          <h3>
+            Errors: {totalTypedChars - correctTypedChars}/
+            <span className='totalChars'>{totalTypedChars}</span> | Accuracy:{' '}
+            {totalTypedChars === 0
+              ? 0
+              : ((correctTypedChars * 100) / totalTypedChars).toFixed(2)}
+            %
+          </h3>
+          <h3>
+            Speed=> CPM:{' '}
+            {startTime ? (correctTypedChars / getTimeDur()).toFixed(0) : 0} |
+            WPM: {startTime ? (wordCount / getTimeDur()).toFixed(0) : 0}
+          </h3>
+        </div>
       </header>
       <ResultModal open={showResultModal} handleClose={handleModalClose}>
         <h1 className='result-heading'>
