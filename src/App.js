@@ -7,12 +7,17 @@ import ResultModal from './Components/Modal/Modal';
 import UIfx from 'uifx';
 import keyPressAudio from './keypress.mp3';
 
+// Passing keypress audio to uifx to use it to play on particular events..
 const keyAudio = new UIfx(keyPressAudio);
 
+// Generating random words initially
 const words = generateWords();
 
 const App = () => {
+  // timeInterval variable to use in setInterval and clearInterval
   let timeInterval = null;
+
+  // various state variables to use in logic for our app
   const [currentChar, setCurrentChar] = useState(words.charAt(0));
   const [incomingChars, setIncomingChars] = useState(words.substr(1));
   const [wordsArray, setWordsArray] = useState([]);
@@ -31,20 +36,27 @@ const App = () => {
   const [isTimeFinished, setIsTimeFinished] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
 
+  // Passing a callback method to imported useKeyPress custom hook method
+  // And key parameter is passed from this hook on keypress to this callback method
   useKeyPress(key => {
     let updatedIncomingChars = incomingChars;
     let newCurrentObj = currentObj;
     let newWordsArray = wordsArray;
 
+    // starting the timer on first keypress
     if (!startTime) {
       setStartTime(currentTime());
       startTimer();
     }
 
+    // If time is not finished, then only logic will run on keyPress
     if (!isTimeFinished) {
+      // When pressed key is same as the key to type
       if (key === currentChar) {
+        // play audio
         keyAudio.setVolume(0.4).play();
 
+        // logic for the characters that are getting typed
         if (currentObj.hasErr === false) {
           newCurrentObj.strTyped += currentChar;
           setCurrentObj(newCurrentObj);
@@ -58,17 +70,23 @@ const App = () => {
           setCurrentObj(newCurrentObj);
         }
 
+        // logic for current character to type
         setCurrentChar(incomingChars.charAt(0));
 
+        // logic for characters that will be typed in future
         updatedIncomingChars = incomingChars.substring(1);
         if (updatedIncomingChars.split(' ').length < 10) {
           updatedIncomingChars += ' ' + generateWords();
         }
         setIncomingChars(updatedIncomingChars);
+
+        // logic to update total chars typed and total correct chars typed
         const updatedTotalTypedChars = totalTypedChars + 1;
         setTotalTypedChars(updatedTotalTypedChars);
         const updatedCorrectTypedChars = correctTypedChars + 1;
         setCorrectTypedChars(updatedCorrectTypedChars);
+
+        // logic to update word count and current word index
         if (incomingChars.charAt(0) === ' ') {
           if (isWordCorrect) {
             setWordCount(wordCount + 1);
@@ -77,7 +95,11 @@ const App = () => {
           setIsWordCorrect(true);
         }
       } else if (key === 'Backspace') {
+        // When pressed key is backspace
+
+        // Backspace functionality only runs if there is atleast one character typed already
         if (currentObj.strTyped.length > 0) {
+          // play audio
           keyAudio.setVolume(0.4).play();
 
           let newCurrentObj = currentObj;
@@ -85,6 +107,7 @@ const App = () => {
           let newIsWordCorrect = isWordCorrect;
           let newCurrentIndex = currentIndex;
 
+          // logic to update total correct chars typed and for bringing back already typed chars
           if (newCurrentObj.hasErr === false) {
             const updatedCorrectTypedChars = correctTypedChars - 1;
             setCorrectTypedChars(updatedCorrectTypedChars);
@@ -107,13 +130,19 @@ const App = () => {
             });
           }
 
+          // logic for current char to type
           const currentCharr = currentChar;
           setCurrentChar(lastChar);
 
+          // logic to update chars that will be typed in future
           updatedIncomingChars = currentCharr + incomingChars;
           setIncomingChars(updatedIncomingChars);
+
+          // logic to update total chars typed
           const updatedTotalTypedChars = totalTypedChars - 1;
           setTotalTypedChars(updatedTotalTypedChars);
+
+          // logic to update word count, current word index and whether word is correct or not
           if (currentCharr === ' ') {
             newCurrentIndex = currentIndex - 1;
             setCurrentIndex(newCurrentIndex);
@@ -145,9 +174,12 @@ const App = () => {
           }
         }
       } else {
+        // When pressed key doesn't match with the key to type
+
         let newCurrentObj = currentObj;
         let newWordsArray = wordsArray;
 
+        // logic to update already typed chars
         if (currentObj.hasErr === true) {
           newCurrentObj.strTyped += currentChar;
           setCurrentObj(newCurrentObj);
@@ -161,13 +193,17 @@ const App = () => {
           setCurrentObj(newCurrentObj);
         }
 
+        // logic to update current char to type
         setCurrentChar(incomingChars.charAt(0));
 
+        // logic to update the chars which will be typed in future
         updatedIncomingChars = incomingChars.substring(1);
         if (updatedIncomingChars.split(' ').length < 10) {
           updatedIncomingChars += ' ' + generateWords();
         }
         setIncomingChars(updatedIncomingChars);
+
+        // logic to update total chars typed and whether word is correct or not
         const updatedTotalTypedChars = totalTypedChars + 1;
         setTotalTypedChars(updatedTotalTypedChars);
         setIsWordCorrect(false);
@@ -195,6 +231,7 @@ const App = () => {
     }
   });
 
+  // To clear setInterval on component unmount
   useEffect(() => {
     return () => {
       if (timeInterval !== null) {
@@ -203,6 +240,7 @@ const App = () => {
     };
   });
 
+  // Method to update timer every second and stop it when time finishes
   const startTimer = () => {
     let newTimer = timer;
     timeInterval = setInterval(() => {
@@ -217,16 +255,19 @@ const App = () => {
     }, 1000);
   };
 
+  // Method to show result modal after time finishes
   const showResult = () => {
     setIsTimeFinished(true);
     setShowResultModal(true);
   };
 
+  // Method to close result modal on click outside of it
   const handleModalClose = () => {
     setShowResultModal(false);
     resetSettings();
   };
 
+  // Method to reset all settings to allow user to play again
   const resetSettings = () => {
     const newWords = generateWords();
     timeInterval = null;
@@ -248,6 +289,7 @@ const App = () => {
     setIsTimeFinished(false);
   };
 
+  // Method to calculate time duration passed at a particular moment in the game.
   const getTimeDur = () => {
     if (!isTimeFinished) {
       return (currentTime() - startTime) / 60000.0;
@@ -256,6 +298,8 @@ const App = () => {
     }
   };
 
+  // logic to show only 20 characters on left of current char cursor, so as to keep position of
+  // current char cursor static and in center of screen
   let counter = 20;
   let finalArr = [];
   let typeArr = [...wordsArray, currentObj];
